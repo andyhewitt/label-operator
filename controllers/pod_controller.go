@@ -93,11 +93,11 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		log.Info("removing label")
 	}
 
-    /*
-        Step 2: Update the Pod in the Kubernetes API.
-    */
+	/*
+	   Step 2: Update the Pod in the Kubernetes API.
+	*/
 
-	if err := r.Update(ctx, &pod) != nil {
+	if err := r.Update(ctx, &pod); err != nil {
 		if apierrors.IsConflict(err) {
 			// The Pod has been updated since we read it.
 			// Requeue the Pod to try to reconciliate again.
@@ -105,7 +105,9 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		}
 
 		if apierrors.IsNotFound(err) {
-			// The 
+			// The Pod has been deleted since we read it.
+			// Requeue the Pod to try to reconciliate again.
+			return ctrl.Result{Requeue: true}, nil
 		}
 
 		log.Error(err, "unable to update pod")
